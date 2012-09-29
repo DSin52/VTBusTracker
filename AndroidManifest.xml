@@ -1,0 +1,66 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.vtbustracker"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="12" />
+
+    <uses-permission xmlns:android="http://schemas.android.com/apk/res/android"
+        android:name="android.permission.INTERNET">
+    </uses-permission>
+
+    
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="VT Bustracker"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".BusActivity"
+            android:label="VTBusTracker" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".StopCodeActivity"
+            android:label="VT BusTracker" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TimeCodeActivity"
+            android:label="VT BusTracker" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".FavoritesList"
+            android:label="VT BusTracker" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SecondStopActivity"
+            android:label="VT BusTracker" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

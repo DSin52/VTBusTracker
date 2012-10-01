@@ -2,10 +2,8 @@ package com.android.vtbustracker;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.concurrent.ExecutionException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -23,89 +21,63 @@ import android.app.ListActivity;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 @TargetApi(12)
 public class SecondStopActivity extends ListActivity {
 	private ArrayList<String>[] stringList;
 	ArrayAdapter<String> ad;
-	String test = "";
-	String currentBus = "";
-	RunThread newRun;
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-
-		
-
-	}
+	AsyncRun run;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		//setCurrentBus(getIntent().getExtras().getString("stop", "fail"));
-		setCurrentBus(getIntent().getExtras().getString("stop"));
 
-		newRun = new RunThread();
+		run = new AsyncRun();
 		try {
-			stringList = newRun.execute().get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			stringList = run.execute().get();
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-			
-		    
-			setListAdapter(new ArrayAdapter<String>(SecondStopActivity.this,
-					R.layout.customlist, stringList[0]));
-			getListView().setBackgroundColor(Color.rgb(128, 0, 0));
+		}
+
+		setListAdapter(new ArrayAdapter<String>(SecondStopActivity.this,
+				R.layout.busfav, stringList[0]));
+		getListView().setBackgroundColor(Color.rgb(128, 0, 0));
 
 	}
 
-
-	private class RunThread extends AsyncTask<String, Void, ArrayList<String>[]> {
+	private class AsyncRun extends AsyncTask<String, Void, ArrayList<String>[]> {
 		ArrayList<String> list = new ArrayList<String>();
 		ArrayList<String> list2 = new ArrayList<String>();
 		ArrayList<String> list3 = new ArrayList<String>();
 
-
 		@Override
 		protected ArrayList<String>[] doInBackground(String... params) {
 			HttpClient client = new DefaultHttpClient();
-
-			HttpGet getRequest = new HttpGet(
+			HttpGet get = new HttpGet(
 					"http://www.bt4u.org/BT4U_Webservice.asmx/"
-							+ "GetScheduledStopNames?routeShortName=" + getCurrentBus());
+							+ "GetCurrentBusInfo?");
+
+			SAXParserFactory sxf = SAXParserFactory.newInstance();
 			try {
-				
-				list.clear();
-				list2.clear();
-				list3.clear();
-				HttpResponse response = client.execute(getRequest);
+				HttpResponse response = client.execute(get);
 
 				HttpEntity entity = response.getEntity();
-
-				SAXParserFactory sxf = SAXParserFactory.newInstance();
-
 				SAXParser sp = sxf.newSAXParser();
 
 				DefaultHandler handler = new DefaultHandler() {
 					boolean route = false;
 					boolean code = false;
 					String test = "";
+
 					public void startElement(String uri, String localName,
 							String qName, Attributes attributes)
 							throws SAXException {
 
-						if (qName.equals("StopName")) {
+						if (qName.equals("RouteShortName")) {
 							route = true;
 						}
-						
-						if(qName.equals("StopCode"))
-						{
+
+						if (qName.equals("TripPointName")) {
 							code = true;
 						}
 
@@ -128,13 +100,13 @@ public class SecondStopActivity extends ListActivity {
 							route = false;
 
 						}
-						
+
 						if (code) {
 							String test2 = new String(ch, start, length);
 							if (!test.equals("")) {
 								list3.add(test2);
 							}
-							
+
 							code = false;
 						}
 
@@ -145,53 +117,29 @@ public class SecondStopActivity extends ListActivity {
 				InputStream stream = entity.getContent();
 				sp.parse(stream, handler);
 				stream.close();
-
+			} catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SAXException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("LIST SIZE: " + list2.size());
-			System.out.println("LIST SIZE: " + list3.size());
-			System.out.println(list3.get(0) + " " + list2.get(0));
-			for (int i = 0; i < list3.size(); i ++)
-			{
+
+			for (int i = 0; i < list3.size(); i++) {
 				String add = list3.get(i) + " " + list2.get(i);
 				list.add(add);
 			}
-			System.out.println(list.get(3));
 			@SuppressWarnings("unchecked")
 			ArrayList<String>[] arrayList = new ArrayList[3];
-			
-			Collections.sort(list, new Comparator<String>() {
-			    public int compare(String a, String b) {
-			        return Integer.signum(fixString(a) - fixString(b));
-			    }
-			    private int fixString(String in) {
-			        return Integer.parseInt(in.substring(0, 4));
-			    }
-			});
-			Collections.sort(list3, new Comparator<String>() {
-			    public int compare(String a, String b) {
-			        return Integer.signum(fixString(a) - fixString(b));
-			    }
-			    private int fixString(String in) {
-			        return Integer.parseInt(in.substring(0, 4));
-			    }
-			});
-			
+
 			arrayList[0] = list;
 			arrayList[1] = list2;
 			arrayList[2] = list3;
 			return arrayList;
 		}
-		
+
 	}
-	
-	public void setCurrentBus(String bus)
-	{
-		currentBus = bus;
-	}
-	public String getCurrentBus()
-	{
-		return currentBus;
-	}
+
 }

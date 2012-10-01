@@ -53,7 +53,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SecondStopActivity"
+            android:name=".SimpleList"
             android:label="VT BusTracker" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
